@@ -1,0 +1,213 @@
+from browser import document, ajax, window
+import json
+
+
+def by_id(el_id):
+    return document.getElementById(el_id)
+
+
+def to_py(obj):
+    try:
+        # Convert JS object to Python dict via JSON
+        return json.loads(window.JSON.stringify(obj))
+    except Exception:
+        return obj
+
+
+def parse_error(err):
+    e = to_py(err)
+    # Common FastAPI error {"detail": "..."} or {"detail": [{...}]}
+    if isinstance(e, dict):
+        if "detail" in e:
+            d = e["detail"]
+            if isinstance(d, str):
+                return d
+            try:
+                return json.dumps(d)
+            except Exception:
+                return str(d)
+        # Our reject format: {"status": xxx, "text": "...json..."}
+        if "text" in e and e["text"]:
+            try:
+                body = json.loads(e["text"])
+                if isinstance(body, dict) and "detail" in body:
+                    d = body["detail"]
+                    return d if isinstance(d, str) else json.dumps(d)
+                return e["text"]
+            except Exception:
+                return e["text"]
+        return json.dumps(e)
+    if isinstance(e, str):
+        return e
+    try:
+        return window.JSON.stringify(err)
+    except Exception:
+        return "Unknown error"
+
+
+def api_post(path, data, with_auth=False):
+    def _send(resolve, reject):
+        req = ajax.Ajax()
+        req.open("POST", path, True)
+        req.with_credentials = True
+        req.set_header("Content-Type", "application/json")
+        if with_auth:
+            token = window.sessionStorage.getItem("access_token")
+            if token:
+                req.set_header("Authorization", f"Bearer {token}")
+
+        def on_complete(ev):
+            try:
+                if 200 <= req.status < 300:
+                    # Prefer req.text -> Python dict
+                    resolve(json.loads(req.text) if req.text else {})
+                else:
+                    reject({"status": req.status, "text": req.text})
+            except Exception as e:
+                reject({"status": req.status, "error": str(e)})
+
+        req.bind("complete", on_complete)
+        req.send(json.dumps(data))
+
+    return window.Promise.new(_send)
+
+
+def api_get(path, with_auth=False):
+    def _send(resolve, reject):
+        req = ajax.Ajax()
+        req.open("GET", path, True)
+        req.with_credentials = True
+        if with_auth:
+            token = window.sessionStorage.getItem("access_token")
+            if token:
+                req.set_header("Authorization", f"Bearer {token}")
+
+        def on_complete(ev):
+            try:
+                if 200 <= req.status < 300:
+                    resolve(json.loads(req.text) if req.text else {})
+                else:
+                    reject({"status": req.status, "text": req.text})
+            except Exception as e:
+                reject({"status": req.status, "error": str(e)})
+
+        req.bind("complete", on_complete)
+        req.send()
+
+    return window.Promise.new(_send)
+
+
+def set_msg(el_id, text, ok=False):
+    el = by_id(el_id)
+    if el is not None:
+        el.text = text
+        el.class_name = "msg ok" if ok else "msg err"
+
+
+def on_login_submit(ev):
+    ev.preventDefault()
+    email = by_id("login-email").value
+    password = by_id("login-password").value
+    payload = {"email": email, "password": password}
+
+    def ok(resp):
+        data = to_py(resp)
+        token = data.get("access_token") if isinstance(data, dict) else None
+        if token:
+            window.sessionStorage.setItem("access_token", token)
+            set_msg("login-msg", "Signed in.", ok=True)
+            window.setTimeout(lambda: window.location.assign("/dashboard"), 300)
+        else:
+            set_msg("login-msg", "No token received.", ok=False)
+
+    def fail(err):
+        set_msg("login-msg", f"Login failed: {parse_error(err)}", ok=False)
+
+    api_post("/auth/login", payload).then(ok, fail)
+
+
+def on_register_submit(ev):
+    ev.preventDefault()
+    email = by_id("register-email").value
+    password = by_id("register-password").value
+    name = by_id("register-name").value
+    payload = {"email": email, "password": password, "name": name}
+
+    def ok(resp):
+        set_msg("register-msg", "Registered. You can sign in now.", ok=True)
+        window.setTimeout(lambda: window.location.assign("/login"), 500)
+
+    def fail(err):
+        set_msg("register-msg", f"Register failed: {parse_error(err)}", ok=False)
+
+    api_post("/auth/register", payload).then(ok, fail)
+
+
+def load_me():
+    def ok(resp):
+        data = to_py(resp)
+        email = data.get("email") or "—" if isinstance(data, dict) else "—"
+        name = data.get("name") or "—" if isinstance(data, dict) else "—"
+        em_el = by_id("me-email")
+        nm_el = by_id("me-name")
+        if em_el:
+            em_el.text = email
+        if nm_el:
+            nm_el.text = name
+
+    def fail(err):
+        set_msg("dash-msg", "Not authenticated. Please sign in.", ok=False)
+
+    api_get("/auth/me", with_auth=True).then(ok, fail)
+
+
+def on_refresh_click(ev):
+    def ok(resp):
+        data = to_py(resp)
+        token = data.get("access_token") if isinstance(data, dict) else None
+        if token:
+            window.sessionStorage.setItem("access_token", token)
+            set_msg("dash-msg", "Access token refreshed.", ok=True)
+        else:
+            set_msg("dash-msg", "No token on refresh.", ok=False)
+
+    def fail(err):
+        set_msg("dash-msg", f"Refresh failed: {parse_error(err)}", ok=False)
+
+    api_post("/auth/refresh", {}).then(ok, fail)
+
+
+def on_logout_click(ev):
+    def ok(_):
+        window.sessionStorage.removeItem("access_token")
+        set_msg("dash-msg", "Logged out.", ok=True)
+        window.setTimeout(lambda: window.location.assign("/login"), 300)
+
+    def fail(err):
+        set_msg("dash-msg", f"Logout failed: {parse_error(err)}", ok=False)
+
+    api_post("/auth/logout", {}, with_auth=True).then(ok, fail)
+
+
+def bind_events():
+    lf = by_id("login-form")
+    if lf is not None:
+        lf.bind("submit", on_login_submit)
+
+    rf = by_id("register-form")
+    if rf is not None:
+        rf.bind("submit", on_register_submit)
+
+    btnr = by_id("btn-refresh")
+    if btnr is not None:
+        btnr.bind("click", on_refresh_click)
+
+    btnl = by_id("btn-logout")
+    if btnl is not None:
+        btnl.bind("click", on_logout_click)
+
+    if by_id("me-email") is not None:
+        load_me()
+
+
+bind_events()

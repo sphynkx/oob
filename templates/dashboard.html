@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="panel">
+  <h2>Dashboard</h2>
+  <div id="me-block" class="card">
+    <div class="row"><strong>Email:</strong> <span id="me-email">—</span></div>
+    <div class="row"><strong>Name:</strong> <span id="me-name">—</span></div>
+  </div>
+  <div class="actions">
+    <button id="btn-refresh" class="btn">Refresh token</button>
+    <button id="btn-logout" class="btn danger">Logout</button>
+  </div>
+  <div id="dash-msg" class="msg"></div>
+</section>
+{% endblock %}

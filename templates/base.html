@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>{{ title if title else "oob Auth Service" }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="/static/css/style.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython_stdlib.js"></script>
+  <script src="/static/js/brython-init.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="container">
+      <div class="brand">oob</div>
+      <nav class="nav">
+        <a href="/">Home</a>
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/docs" target="_blank">API Docs</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <small>oob Auth Service</small>
+    </div>
+  </footer>
+
+  <script type="text/python" src="/static/brython/auth.bry"></script>
+</body>
+</html>

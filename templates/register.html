@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="panel">
+  <h2>Create account</h2>
+  <form id="register-form" class="form">
+    <label>Email
+      <input id="register-email" type="email" name="email" placeholder="you@example.com" required />
+    </label>
+    <label>Password
+      <input id="register-password" type="password" name="password" required />
+    </label>
+    <label>Name
+      <input id="register-name" type="text" name="name" placeholder="Your name" />
+    </label>
+    <button type="submit" class="btn primary">Register</button>
+  </form>
+  <div id="register-msg" class="msg"></div>
+  <p>Already have an account? <a href="/login">Sign in</a></p>
+</section>
+{% endblock %}
