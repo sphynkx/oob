@@ -2,7 +2,13 @@
 {% block content %}
 <h2>Sign in</h2>
 {% if error %}<div class="msg err">{{ error }}</div>{% endif %}
+
+<div style="margin-bottom:12px;">
+  <a class="btn" href="/oauth/google/start">Sign in with Google</a>
+</div>
+
 <form id="login-form" class="form" method="post" action="/login">
+  {% if csrf_token %}<input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>{% endif %}
   <label>Email
     <input name="email" type="email" required />
   </label>

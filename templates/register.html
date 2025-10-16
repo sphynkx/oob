@@ -3,6 +3,7 @@
 <h2>Create account</h2>
 {% if error %}<div class="msg err">{{ error }}</div>{% endif %}
 <form id="register-form" class="form" method="post" action="/register">
+  {% if csrf_token %}<input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>{% endif %}
   <label>Name
     <input name="name" type="text" value="{{ form.name if form and form.name else '' }}" />
   </label>

@@ -20,7 +20,7 @@ async def list_products(limit: int = Query(50, ge=1, le=100), offset: int = Quer
     return items
 
 
-## Order is important!! "/products/stats" AFTER "/products"!!
+## keep stats BEFORE parameterized route
 @router.get("/products/stats")
 async def products_stats(user=Depends(get_current_user)):
     return await get_products_stats_service(user["id"])

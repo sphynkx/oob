@@ -6,6 +6,7 @@ Stack:
 * asyncio
 * Postgres
 * Brython
+* Oauth2
 
 
 ## Install and config
@@ -20,7 +21,11 @@ cp install/.env-sample .env
 ```
 Modify `.env` with your own params.
 
+Go to [Google Cloud Console](https://console.cloud.google.com/), create new Web-app, config it, get secrets, set them to `.env` also.
+
+
 ### DB
+
 Add to `/var/lib/pgsql/data/pg_hba.conf`:
 ```conf
 # oob app
@@ -37,6 +42,7 @@ service postgresql restart
 
 
 ### Nginx
+
 On external hosting server - create `/etc/nginx/conf.d/oob.conf`:
 ```conf
 server {

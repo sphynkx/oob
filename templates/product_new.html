@@ -6,6 +6,7 @@
     <div class="msg err">{{ error }}</div>
   {% endif %}
   <form class="form" method="post" action="/products/new">
+    {% if csrf_token %}<input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>{% endif %}
     <label>Title
       <input name="title" type="text" value="{{ form.title if form and form.title else '' }}" required />
     </label>

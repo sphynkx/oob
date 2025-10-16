@@ -3,7 +3,8 @@ uvicorn[standard]
 jinja2
 asyncpg
 bcrypt
-python-jose[cryptography]
+python-jose
 python-dotenv
 email-validator
 python-multipart
+httpx

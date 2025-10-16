@@ -25,6 +25,7 @@
       <nav class="nav">
         {% if request.state.user %}
           <form method="post" action="/logout" style="display:inline;">
+            {% if csrf_token %}<input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>{% endif %}
             <button class="btn danger" type="submit">Logout</button>
           </form>
         {% endif %}

@@ -34,6 +34,7 @@
           {% if request.state.user and ((request.state.user.role|lower == "admin") or (request.state.user.id == p.seller_id)) %}
             <div class="product-actions">
               <form method="post" action="/products/{{ p.id }}/delete" style="display:inline;">
+                {% if csrf_token %}<input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>{% endif %}
                 <button class="btn danger" type="submit">Delete</button>
               </form>
             </div>
