@@ -14,7 +14,7 @@ Stack:
 
 ```bash
 cd /var/www
-git clone https://github.com/obox-systems/test_task_backend_interactive_dev_yurii_chumak oob
+git clone https://github.com/sphynkx/oob
 cd oob
 cp install/.env-sample .env
 ```
