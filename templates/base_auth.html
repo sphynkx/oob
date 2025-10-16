@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>{{ title if title else "Auth" }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="/static/css/style.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython_stdlib.js"></script>
+  <script src="/static/js/brython-init.js"></script>
+</head>
+<body>
+  <main class="container">
+    <section class="panel auth-panel">
+      {% block content %}{% endblock %}
+    </section>
+  </main>
+  <script type="text/python" src="/static/brython/auth.bry"></script>
+</body>
+</html>

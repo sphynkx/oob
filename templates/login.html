@@ -1,17 +1,15 @@
-{% extends "base.html" %}
+{% extends "base_auth.html" %}
 {% block content %}
-<section class="panel">
-  <h2>Sign in</h2>
-  <form id="login-form" class="form">
-    <label>Email
-      <input id="login-email" type="email" name="email" placeholder="you@example.com" required />
-    </label>
-    <label>Password
-      <input id="login-password" type="password" name="password" required />
-    </label>
-    <button type="submit" class="btn primary">Sign in</button>
-  </form>
-  <div id="login-msg" class="msg"></div>
-  <p>No account? <a href="/register">Register</a></p>
-</section>
+<h2>Sign in</h2>
+<form id="login-form" class="form">
+  <label>Email
+    <input id="login-email" type="email" required />
+  </label>
+  <label>Password
+    <input id="login-password" type="password" required />
+  </label>
+  <button type="submit" class="btn primary">Sign in</button>
+</form>
+<div id="login-msg" class="msg"></div>
+<p>No account? <a href="/register">Create one</a></p>
 {% endblock %}
