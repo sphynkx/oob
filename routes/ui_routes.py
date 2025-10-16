@@ -24,3 +24,13 @@ async def register_page(request: Request):
 @router.get("/dashboard", response_class=HTMLResponse, include_in_schema=False)
 async def dashboard_page(request: Request):
     return templates.TemplateResponse("dashboard.html", {"request": request})
+
+
+@router.get("/products", response_class=HTMLResponse, include_in_schema=False)
+async def products_page(request: Request):
+    return templates.TemplateResponse("products.html", {"request": request})
+
+
+@router.get("/products/new", response_class=HTMLResponse, include_in_schema=False)
+async def product_new_page(request: Request):
+    return templates.TemplateResponse("product_new.html", {"request": request})

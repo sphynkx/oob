@@ -1,0 +1,154 @@
+from browser import document, ajax, window
+import json
+
+
+def by_id(el_id):
+    return document.getElementById(el_id)
+
+
+def to_py(obj):
+    try:
+        return json.loads(window.JSON.stringify(obj))
+    except Exception:
+        return obj
+
+
+def parse_error(err):
+    try:
+        e = to_py(err)
+        if isinstance(e, dict) and "text" in e and e["text"]:
+            try:
+                body = json.loads(e["text"])
+                if isinstance(body, dict) and "detail" in body:
+                    d = body["detail"]
+                    return d if isinstance(d, str) else json.dumps(d)
+                return e["text"]
+            except Exception:
+                return e["text"]
+        return window.JSON.stringify(err)
+    except Exception:
+        return "Unknown error"
+
+
+def api_get(path, with_auth=False):
+    def _send(resolve, reject):
+        req = ajax.Ajax()
+        req.open("GET", path, True)
+        req.with_credentials = True
+        if with_auth:
+            token = window.sessionStorage.getItem("access_token")
+            if token:
+                req.set_header("Authorization", f"Bearer {token}")
+
+        def on_complete(ev):
+            try:
+                if 200 <= req.status < 300:
+                    resolve(json.loads(req.text) if req.text else [])
+                else:
+                    reject({"status": req.status, "text": req.text})
+            except Exception as e:
+                reject({"status": req.status, "error": str(e)})
+
+        req.bind("complete", on_complete)
+        req.send()
+
+    return window.Promise.new(_send)
+
+
+def api_post(path, data, with_auth=False):
+    def _send(resolve, reject):
+        req = ajax.Ajax()
+        req.open("POST", path, True)
+        req.with_credentials = True
+        req.set_header("Content-Type", "application/json")
+        if with_auth:
+            token = window.sessionStorage.getItem("access_token")
+            if token:
+                req.set_header("Authorization", f"Bearer {token}")
+
+        def on_complete(ev):
+            try:
+                if 200 <= req.status < 300:
+                    resolve(json.loads(req.text) if req.text else {})
+                else:
+                    reject({"status": req.status, "text": req.text})
+            except Exception as e:
+                reject({"status": req.status, "error": str(e)})
+
+        req.bind("complete", on_complete)
+        req.send(json.dumps(data))
+
+    return window.Promise.new(_send)
+
+
+def render_products(items):
+    root = by_id("products-list")
+    if root is None:
+        return
+    root.clear()
+    if not items:
+        root.text = "No products yet."
+        return
+    for p in items:
+        div = window.document.createElement("div")
+        div.setAttribute("class", "card")
+        title = window.document.createElement("div")
+        title.setAttribute("class", "row")
+        title.innerText = f"{p.get('title')} — {p.get('price')} {p.get('currency')}"
+        desc = window.document.createElement("div")
+        desc.setAttribute("class", "row")
+        desc.innerText = p.get("description") or ""
+        div.appendChild(title)
+        div.appendChild(desc)
+        root.appendChild(div)
+
+
+def load_products():
+    def ok(resp):
+        items = to_py(resp)
+        render_products(items)
+    def fail(err):
+        msg = by_id("products-msg")
+        if msg:
+            msg.text = f"Failed to load products: {parse_error(err)}"
+            msg.class_name = "msg err"
+    api_get("/products").then(ok, fail)
+
+
+def on_new_product_submit(ev):
+    ev.preventDefault()
+    title = by_id("prod-title").value
+    desc = by_id("prod-desc").value
+    price = by_id("prod-price").value
+    currency = by_id("prod-currency").value
+    image = by_id("prod-image").value
+    payload = {
+        "title": title,
+        "description": desc,
+        "price": float(price) if price else 0.0,
+        "currency": currency or "USD",
+        "image_url": image or None,
+    }
+    def ok(resp):
+        msg = by_id("product-new-msg")
+        if msg:
+            msg.text = "Product created."
+            msg.class_name = "msg ok"
+        window.setTimeout(lambda: window.location.assign("/products"), 500)
+    def fail(err):
+        msg = by_id("product-new-msg")
+        if msg:
+            msg.text = f"Create failed: {parse_error(err)}"
+            msg.class_name = "msg err"
+    api_post("/products", payload, with_auth=True).then(ok, fail)
+
+
+def bind():
+    if by_id("products-list") is not None:
+        load_products()
+    form = by_id("product-new-form")
+    if form is not None:
+        form.bind("submit", on_new_product_submit)
+
+
+bind()

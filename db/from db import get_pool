@@ -43,21 +43,6 @@ async def get_session_by_id(session_id):
         return dict(row) if row else None
 
 
-async def list_sessions_for_user(user_id):
-    pool = get_pool()
-    async with pool.acquire() as conn:
-        rows = await conn.fetch(
-            """
-            SELECT id, user_id, user_agent, ip, created_at, last_used_at, expires_at, revoked_at
-            FROM sessions
-            WHERE user_id=$1
-            ORDER BY created_at DESC
-            """,
-            user_id,
-        )
-        return [dict(r) for r in rows]
-
-
 async def touch_session(session_id):
     pool = get_pool()
     async with pool.acquire() as conn:

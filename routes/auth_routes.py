@@ -16,7 +16,13 @@ router = APIRouter()
 async def register(payload: RegisterRequest):
     try:
         user = await register_user_service(payload.email, payload.password, payload.name)
-        return {"id": user["id"], "email": user["email"], "name": user["name"], "avatar_url": user["avatar_url"]}
+        return {
+            "id": user["id"],
+            "email": user["email"],
+            "name": user["name"],
+            "avatar_url": user["avatar_url"],
+            "role": user.get("role"),
+        }
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
@@ -81,4 +87,10 @@ async def logout(request: Request, payload: LogoutRequest | None = None, user=De
 
 @router.get("/me", response_model=MeResponse)
 async def me(user=Depends(get_current_user)):
-    return {"id": user["id"], "email": user["email"], "name": user["name"], "avatar_url": user["avatar_url"]}
+    return {
+        "id": user["id"],
+        "email": user["email"],
+        "name": user["name"],
+        "avatar_url": user["avatar_url"],
+        "role": user.get("role"),
+    }

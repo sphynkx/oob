@@ -31,7 +31,7 @@ host    oob01           oob        ::1/128              scram-sha-256
 Replace 'ADMIN_PASSWORD' to postgres admin password and 'SECRET' to the same as in the `.env`. And run:
 ```bash
 sudo -u postgres PGPASSWORD='ADMIN_PASSWORD'  psql -v db_user='oob' -v db_name='oob01' -v db_pass='SECRET' -f install/prep.sql
-psql -U oob -d oob01 -f install/schema.sql
+sudo -u postgres psql -d oob01  -f install/schema.sql
 service postgresql restart
 ```
 

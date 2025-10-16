@@ -6,7 +6,9 @@ from starlette.staticfiles import StaticFiles
 from config import get_config
 from db import init_database, close_database
 from routes.auth_routes import router as auth_router
+from routes.auth_sessions_routes import router as auth_sessions_router
 from routes.health_routes import router as health_router
+from routes.products_routes import router as products_router
 from routes.ui_routes import router as ui_router
 
 
@@ -20,7 +22,7 @@ async def lifespan(app):
 
 
 cfg = get_config()
-app = FastAPI(title="oob Auth Service", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="oob Auth Service", version="0.2.0", lifespan=lifespan)
 
 cors_origins = cfg.get("CORS_ORIGINS", ["*"])
 if isinstance(cors_origins, str):
@@ -40,3 +42,5 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(health_router, tags=["health"])
 app.include_router(ui_router, tags=["ui"])
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
+app.include_router(auth_sessions_router, tags=["auth-sessions"])
+app.include_router(products_router, tags=["products"])

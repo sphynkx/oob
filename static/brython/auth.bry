@@ -8,7 +8,6 @@ def by_id(el_id):
 
 def to_py(obj):
     try:
-        # Convert JS object to Python dict via JSON
         return json.loads(window.JSON.stringify(obj))
     except Exception:
         return obj
@@ -16,7 +15,6 @@ def to_py(obj):
 
 def parse_error(err):
     e = to_py(err)
-    # Common FastAPI error {"detail": "..."} or {"detail": [{...}]}
     if isinstance(e, dict):
         if "detail" in e:
             d = e["detail"]
@@ -26,7 +24,6 @@ def parse_error(err):
                 return json.dumps(d)
             except Exception:
                 return str(d)
-        # Our reject format: {"status": xxx, "text": "...json..."}
         if "text" in e and e["text"]:
             try:
                 body = json.loads(e["text"])
@@ -59,7 +56,6 @@ def api_post(path, data, with_auth=False):
         def on_complete(ev):
             try:
                 if 200 <= req.status < 300:
-                    # Prefer req.text -> Python dict
                     resolve(json.loads(req.text) if req.text else {})
                 else:
                     reject({"status": req.status, "text": req.text})
@@ -148,12 +144,16 @@ def load_me():
         data = to_py(resp)
         email = data.get("email") or "—" if isinstance(data, dict) else "—"
         name = data.get("name") or "—" if isinstance(data, dict) else "—"
+        role = data.get("role") or "—" if isinstance(data, dict) else "—"
         em_el = by_id("me-email")
         nm_el = by_id("me-name")
+        rl_el = by_id("me-role")
         if em_el:
             em_el.text = email
         if nm_el:
             nm_el.text = name
+        if rl_el:
+            rl_el.text = role
 
     def fail(err):
         set_msg("dash-msg", "Not authenticated. Please sign in.", ok=False)
