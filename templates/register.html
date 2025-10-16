@@ -1,18 +1,18 @@
 {% extends "base_auth.html" %}
 {% block content %}
 <h2>Create account</h2>
-<form id="register-form" class="form">
+{% if error %}<div class="msg err">{{ error }}</div>{% endif %}
+<form id="register-form" class="form" method="post" action="/register">
   <label>Name
-    <input id="register-name" type="text" />
+    <input name="name" type="text" value="{{ form.name if form and form.name else '' }}" />
   </label>
   <label>Email
-    <input id="register-email" type="email" required />
+    <input name="email" type="email" value="{{ form.email if form and form.email else '' }}" required />
   </label>
   <label>Password
-    <input id="register-password" type="password" required />
+    <input name="password" type="password" required />
   </label>
   <button type="submit" class="btn primary">Sign up</button>
 </form>
-<div id="register-msg" class="msg"></div>
 <p>Already have an account? <a href="/login">Sign in</a></p>
 {% endblock %}

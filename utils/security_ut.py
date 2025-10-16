@@ -1,6 +1,8 @@
 import bcrypt
 import secrets
 from datetime import datetime, timedelta, timezone
+from typing import Optional
+
 from jose import jwt, JWTError
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -97,3 +99,23 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(_
         return user
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+
+
+async def get_user_from_token(token: str) -> dict:
+    """
+    Decode JWT access token and load user (same logic as get_current_user, but without Depends()).
+    Raises HTTPException 401 on failure.
+    """
+    sec = get_security_config()
+    try:
+        payload = jwt.decode(token, sec["JWT_SECRET"], algorithms=[sec["JWT_ALGORITHM"]])
+        sub = payload.get("sub")
+        if not sub:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        user = await get_user_by_id(int(sub))
+        if not user:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+        return user
+    except JWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+

@@ -2,22 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>{{ title if title else "oob Auth Service" }}</title>
+  <title>{{ title if title else "oob" }}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link href="/static/css/style.css" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython_stdlib.js"></script>
-  <script src="/static/js/brython-init.js"></script>
 </head>
 <body>
   <header class="topbar">
-    <div class="container">
-      <div class="brand">oob</div>
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div class="brand">oob</div>
+        <nav class="nav">
+          <a href="/">Home</a>
+          <a href="/dashboard">Dashboard</a>
+          <a href="/products">Products</a>
+          <a href="/docs" target="_blank">API Docs</a>
+          {% if request.state.user %}{% else %}
+            <a href="/login">Login</a>
+            <a href="/register">Register</a>
+          {% endif %}
+        </nav>
+      </div>
       <nav class="nav">
-        <a href="/">Home</a>
-        <a href="/dashboard">Dashboard</a>
-        <a href="/products">Products</a>
-        <a href="/docs" target="_blank">API Docs</a>
+        {% if request.state.user %}
+          <form method="post" action="/logout" style="display:inline;">
+            <button class="btn danger" type="submit">Logout</button>
+          </form>
+        {% endif %}
       </nav>
     </div>
   </header>
@@ -25,15 +35,5 @@
   <main class="container">
     {% block content %}{% endblock %}
   </main>
-
-  <footer class="footer">
-    <div class="container">
-      <small>oob Auth Service</small>
-    </div>
-  </footer>
-
-  <script type="text/python" src="/static/brython/auth_guard.bry"></script>
-  <script type="text/python" src="/static/brython/auth.bry"></script>
-  <script type="text/python" src="/static/brython/products.bry"></script>
 </body>
 </html>

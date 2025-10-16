@@ -4,6 +4,8 @@ from db.products_db import (
     get_product_db,
     update_product_db,
     delete_product_db,
+    count_products_total_db,
+    count_products_by_seller_db,
 )
 
 
@@ -26,7 +28,14 @@ async def create_product_service(user, title, description, price, currency, imag
     if not title or price is None:
         raise ValueError("Title and price are required")
     currency_val = currency or "USD"
-    product = await create_product_db(user["id"], title, description, float(price), currency_val, image_url)
+    product = await create_product_db(
+        user["id"],
+        title,
+        description,
+        float(price),
+        currency_val,
+        image_url,
+    )
     return product
 
 
@@ -43,7 +52,15 @@ async def get_product_service(product_id):
     return product
 
 
-async def update_product_service(user, product_id, title=None, description=None, price=None, currency=None, image_url=None):
+async def update_product_service(
+    user,
+    product_id,
+    title=None,
+    description=None,
+    price=None,
+    currency=None,
+    image_url=None,
+):
     existing = await get_product_db(product_id)
     if not existing:
         raise LookupError("Not found")
@@ -53,7 +70,14 @@ async def update_product_service(user, product_id, title=None, description=None,
     new_price = float(price) if price is not None else float(existing["price"])
     new_currency = currency if currency is not None else existing["currency"]
     new_image_url = image_url if image_url is not None else existing["image_url"]
-    updated = await update_product_db(product_id, new_title, new_description, new_price, new_currency, new_image_url)
+    updated = await update_product_db(
+        product_id,
+        new_title,
+        new_description,
+        new_price,
+        new_currency,
+        new_image_url,
+    )
     return updated
 
 
@@ -63,3 +87,10 @@ async def delete_product_service(user, product_id):
         return
     _ensure_owner_or_admin(user, existing["seller_id"])
     await delete_product_db(product_id)
+
+
+async def get_products_stats_service(user_id):
+    total = await count_products_total_db()
+    mine = await count_products_by_seller_db(user_id)
+    return {"total": total, "mine": mine}
+

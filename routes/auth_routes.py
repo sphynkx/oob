@@ -1,6 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
 from utils.schemas_ut import RegisterRequest, LoginRequest, TokenResponse, MeResponse, LogoutRequest
-from utils.security_ut import get_current_user, get_refresh_cookie_name
+from utils.security_ut import (
+    get_current_user,
+    get_refresh_cookie_name,
+    get_user_from_token,
+)
 from services.auth_service import (
     register_user_service,
     login_user_service,
@@ -72,11 +78,23 @@ async def refresh(request: Request, response: Response):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
 
 
+## Current-session logout doesnt require Bearer; it uses refresh cookie only.
+## "Logout all" still requires Bearer and user identity.
 @router.post("/logout", status_code=204)
-async def logout(request: Request, payload: LogoutRequest | None = None, user=Depends(get_current_user)):
+async def logout(
+    request: Request,
+    payload: LogoutRequest | None = None,
+    authorization: HTTPAuthorizationCredentials | None = Depends(HTTPBearer(auto_error=False)),
+):
     if payload and payload.all:
+        ## Requires Bearer to identify the user
+        if authorization is None or not authorization.credentials:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
+        user = await get_user_from_token(authorization.credentials)
         await logout_all_service(user["id"])
         return Response(status_code=204)
+
+    ## Current session logout via refresh cookie
     cookie_name = get_refresh_cookie_name()
     refresh_token = request.cookies.get(cookie_name)
     if not refresh_token:
@@ -94,3 +112,4 @@ async def me(user=Depends(get_current_user)):
         "avatar_url": user["avatar_url"],
         "role": user.get("role"),
     }
+

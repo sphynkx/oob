@@ -90,3 +90,21 @@ async def delete_product_db(product_id):
     pool = get_pool()
     async with pool.acquire() as conn:
         await conn.execute("DELETE FROM products WHERE id=$1", product_id)
+
+
+async def count_products_total_db():
+    pool = get_pool()
+    async with pool.acquire() as conn:
+        val = await conn.fetchval("SELECT COUNT(*) FROM products")
+        return int(val or 0)
+
+
+async def count_products_by_seller_db(seller_id):
+    pool = get_pool()
+    async with pool.acquire() as conn:
+        val = await conn.fetchval(
+            "SELECT COUNT(*) FROM products WHERE seller_id=$1",
+            seller_id,
+        )
+        return int(val or 0)
+

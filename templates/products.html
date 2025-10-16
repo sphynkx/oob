@@ -3,9 +3,45 @@
 <section class="panel">
   <h2>Products</h2>
   <div class="actions">
-    <a class="btn primary" href="/products/new">Create product</a>
+    {% if request.state.user and (request.state.user.role|lower in ["seller","admin"]) %}
+      <a class="btn primary" href="/products/new">Create product</a>
+    {% endif %}
   </div>
-  <div id="products-list" class="list"></div>
-  <div id="products-msg" class="msg"></div>
+
+  {% if not products %}
+    <div class="card">No products yet.</div>
+  {% else %}
+    <div class="list">
+      {% for p in products %}
+      <div class="product-card">
+        <div class="product-thumb">
+          <img src="{{ p.image_url if p.image_url else '/static/img/placeholder.svg' }}" alt="{{ p.title or 'image' }}" onerror="this.onerror=null;this.src='/static/img/placeholder.svg';" />
+        </div>
+        <div class="product-body">
+          <h3 class="product-title">{{ p.title or "(no title)" }}</h3>
+          <div class="product-meta">
+            <div class="meta-row">
+              <span class="meta-label">Price:</span>
+              <span class="meta-value">
+                {% if p.price %}{{ "%.2f"|format(p.price) }} {{ p.currency or "" }}{% else %}--{% endif %}
+              </span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">Description:</span>
+              <span class="meta-value">{{ p.description or "--" }}</span>
+            </div>
+          </div>
+          {% if request.state.user and ((request.state.user.role|lower == "admin") or (request.state.user.id == p.seller_id)) %}
+            <div class="product-actions">
+              <form method="post" action="/products/{{ p.id }}/delete" style="display:inline;">
+                <button class="btn danger" type="submit">Delete</button>
+              </form>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% endif %}
 </section>
 {% endblock %}

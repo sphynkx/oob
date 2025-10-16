@@ -1,15 +1,15 @@
 {% extends "base_auth.html" %}
 {% block content %}
 <h2>Sign in</h2>
-<form id="login-form" class="form">
+{% if error %}<div class="msg err">{{ error }}</div>{% endif %}
+<form id="login-form" class="form" method="post" action="/login">
   <label>Email
-    <input id="login-email" type="email" required />
+    <input name="email" type="email" required />
   </label>
   <label>Password
-    <input id="login-password" type="password" required />
+    <input name="password" type="password" required />
   </label>
   <button type="submit" class="btn primary">Sign in</button>
 </form>
-<div id="login-msg" class="msg"></div>
 <p>No account? <a href="/register">Create one</a></p>
 {% endblock %}

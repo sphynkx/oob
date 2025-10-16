@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+
 from utils.schemas_ut import ProductCreate, ProductUpdate, ProductOut
 from utils.security_ut import get_current_user
 from services.products_service import (
@@ -7,6 +8,7 @@ from services.products_service import (
     get_product_service,
     update_product_service,
     delete_product_service,
+    get_products_stats_service,
 )
 
 router = APIRouter()
@@ -16,6 +18,12 @@ router = APIRouter()
 async def list_products(limit: int = Query(50, ge=1, le=100), offset: int = Query(0, ge=0)):
     items = await list_products_service(limit=limit, offset=offset)
     return items
+
+
+## Order is important!! "/products/stats" AFTER "/products"!!
+@router.get("/products/stats")
+async def products_stats(user=Depends(get_current_user)):
+    return await get_products_stats_service(user["id"])
 
 
 @router.get("/products/{product_id}", response_model=ProductOut)
@@ -71,3 +79,4 @@ async def delete_product(product_id: int, user=Depends(get_current_user)):
         return
     except PermissionError:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+

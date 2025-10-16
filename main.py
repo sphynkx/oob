@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
@@ -10,10 +11,11 @@ from routes.auth_sessions_routes import router as auth_sessions_router
 from routes.health_routes import router as health_router
 from routes.products_routes import router as products_router
 from routes.ui_routes import router as ui_router
+from utils.ui_guard_ut import UiAuthRedirectMiddleware
 
 
 @asynccontextmanager
-async def lifespan(app):
+async def lifespan(app: FastAPI):
     await init_database()
     try:
         yield
@@ -22,7 +24,7 @@ async def lifespan(app):
 
 
 cfg = get_config()
-app = FastAPI(title="oob Auth Service", version="0.2.0", lifespan=lifespan)
+app = FastAPI(title="oob", version="0.2.0", lifespan=lifespan)
 
 cors_origins = cfg.get("CORS_ORIGINS", ["*"])
 if isinstance(cors_origins, str):
@@ -37,13 +39,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+## Server-side UI guard for HTML routes
+app.add_middleware(UiAuthRedirectMiddleware)
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# UI routes (HTML)
+## UI routes (HTML)
 app.include_router(health_router, tags=["health"])
 app.include_router(ui_router, tags=["ui"])
 
-# API routes (JSON)
+## API routes (JSON)
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(auth_sessions_router, tags=["auth-sessions"])
 app.include_router(products_router, prefix="/api", tags=["products"])
