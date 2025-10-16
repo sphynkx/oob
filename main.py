@@ -39,8 +39,11 @@ app.add_middleware(
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+# UI routes (HTML)
 app.include_router(health_router, tags=["health"])
 app.include_router(ui_router, tags=["ui"])
+
+# API routes (JSON)
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(auth_sessions_router, tags=["auth-sessions"])
-app.include_router(products_router, tags=["products"])
+app.include_router(products_router, prefix="/api", tags=["products"])

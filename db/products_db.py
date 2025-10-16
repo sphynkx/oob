@@ -1,6 +1,17 @@
 from db import get_pool
 
 
+def _row_to_product_dict(row):
+    d = dict(row)
+    price = d.get("price")
+    try:
+        if price is not None:
+            d["price"] = float(price)
+    except Exception:
+        pass
+    return d
+
+
 async def create_product_db(seller_id, title, description, price, currency, image_url):
     pool = get_pool()
     async with pool.acquire() as conn:
@@ -17,7 +28,7 @@ async def create_product_db(seller_id, title, description, price, currency, imag
             currency,
             image_url,
         )
-        return dict(row)
+        return _row_to_product_dict(row)
 
 
 async def list_products_db(limit=50, offset=0):
@@ -33,7 +44,7 @@ async def list_products_db(limit=50, offset=0):
             limit,
             offset,
         )
-        return [dict(r) for r in rows]
+        return [_row_to_product_dict(r) for r in rows]
 
 
 async def get_product_db(product_id):
@@ -47,7 +58,7 @@ async def get_product_db(product_id):
             """,
             product_id,
         )
-        return dict(row) if row else None
+        return _row_to_product_dict(row) if row else None
 
 
 async def update_product_db(product_id, title, description, price, currency, image_url):
@@ -72,7 +83,7 @@ async def update_product_db(product_id, title, description, price, currency, ima
             currency,
             image_url,
         )
-        return dict(row) if row else None
+        return _row_to_product_dict(row) if row else None
 
 
 async def delete_product_db(product_id):
