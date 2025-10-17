@@ -2,7 +2,6 @@ import base64
 import hmac
 import os
 from hashlib import sha256
-from typing import Tuple
 
 from config import get_config
 

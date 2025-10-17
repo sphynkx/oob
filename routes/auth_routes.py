@@ -1,18 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from utils.schemas_ut import RegisterRequest, LoginRequest, TokenResponse, MeResponse, LogoutRequest
+from services.auth_service import (
+    login_user_service,
+    logout_all_service,
+    logout_current_service,
+    refresh_token_service,
+    register_user_service,
+)
+from utils.schemas_ut import LoginRequest, LogoutRequest, MeResponse, RegisterRequest, TokenResponse
 from utils.security_ut import (
     get_current_user,
     get_refresh_cookie_name,
     get_user_from_token,
-)
-from services.auth_service import (
-    register_user_service,
-    login_user_service,
-    refresh_token_service,
-    logout_current_service,
-    logout_all_service,
 )
 
 router = APIRouter()

@@ -2,7 +2,6 @@ import base64
 import hmac
 import os
 from hashlib import sha256
-from typing import Tuple
 
 from config import get_config
 
@@ -21,7 +20,7 @@ def _b64u_decode(s: str) -> bytes:
     return base64.urlsafe_b64decode(s + pad)
 
 
-def create_csrf_pair() -> Tuple[str, str]:
+def create_csrf_pair() -> tuple[str, str]:
     """
     Returns (form_token, cookie_value). They are identical (double-submit).
     """

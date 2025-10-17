@@ -1,5 +1,5 @@
-from datetime import datetime, timezone
-from typing import Iterable, Optional
+from collections.abc import Iterable
+from datetime import UTC, datetime
 
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -15,13 +15,13 @@ from utils.security_ut import (
 )
 
 
-def _csv_to_set(val: Optional[str]) -> set[str]:
+def _csv_to_set(val: str | None) -> set[str]:
     if not val:
         return set()
     return {p.strip() for p in val.split(",") if p.strip()}
 
 
-async def _get_user_from_refresh_cookie(request: Request) -> Optional[dict]:
+async def _get_user_from_refresh_cookie(request: Request) -> dict | None:
     """
     Read user from HttpOnly refresh cookie without rotating it.
     Returns user dict or None.
@@ -44,7 +44,7 @@ async def _get_user_from_refresh_cookie(request: Request) -> Optional[dict]:
         return None
 
     expires_at = session.get("expires_at")
-    if not expires_at or expires_at <= datetime.now(timezone.utc):
+    if not expires_at or expires_at <= datetime.now(UTC):
         return None
 
     if not verify_refresh_token_hash(token, session.get("refresh_token_hash") or ""):
@@ -58,7 +58,7 @@ async def _get_user_from_refresh_cookie(request: Request) -> Optional[dict]:
     return user
 
 
-def get_user_from_refresh_cookie_request_sync_state(request: Request) -> Optional[dict]:
+def get_user_from_refresh_cookie_request_sync_state(request: Request) -> dict | None:
     """
     Helper for UI routers: obtain user from request.state if middleware already set it.
     If not set (e.g., POST), this returns None. Routers can re-check via async _get_user_from_refresh_cookie.
@@ -113,7 +113,7 @@ class UiAuthRedirectMiddleware(BaseHTTPMiddleware):
 
         ## Attach user on all HTML routes (GET/POST/etc.)
         user = await _get_user_from_refresh_cookie(request)
-        setattr(request.state, "user", user)
+        request.state.user = user
 
         ## Root redirect
         if self.enable_root_redirect and path == "/":

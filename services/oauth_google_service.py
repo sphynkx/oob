@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import httpx
 
@@ -72,7 +72,7 @@ async def complete_google_login(userinfo: dict, user_agent: str | None, ip: str 
     user = await ensure_user_for_oauth(email=email, name=name, avatar_url=avatar)
 
     sec = get_security_config()
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     refresh_expires_at = now + timedelta(days=sec["REFRESH_TOKEN_EXPIRES_DAYS"])
 
     ## Create session placeholder with proper expires_at (NOT NULL)

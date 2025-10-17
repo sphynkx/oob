@@ -1,7 +1,6 @@
 import base64
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from ipaddress import ip_address
-from typing import Dict
 
 import httpx
 
@@ -46,7 +45,7 @@ async def build_twitter_auth_url(state: str, code_challenge: str) -> str:
     return f"{base}?{qp}"
 
 
-async def exchange_code_for_tokens(code: str, code_verifier: str) -> Dict:
+async def exchange_code_for_tokens(code: str, code_verifier: str) -> dict:
     cfg = get_config()
     token_url = cfg["OAUTH_TWITTER_TOKEN_URL"]
 
@@ -75,7 +74,7 @@ async def exchange_code_for_tokens(code: str, code_verifier: str) -> Dict:
         return r.json()
 
 
-async def fetch_userinfo(access_token: str) -> Dict:
+async def fetch_userinfo(access_token: str) -> dict:
     cfg = get_config()
     url = cfg["OAUTH_TWITTER_USERINFO_URL"]
     params = {"user.fields": "profile_image_url,name,username"}
@@ -86,7 +85,7 @@ async def fetch_userinfo(access_token: str) -> Dict:
         return r.json()
 
 
-async def complete_twitter_login(uinfo: Dict, user_agent: str | None, ip: str | None) -> Dict:
+async def complete_twitter_login(uinfo: dict, user_agent: str | None, ip: str | None) -> dict:
     data = (uinfo or {}).get("data") or {}
     tw_id = (data.get("id") or "").strip()
     name = data.get("name") or ""
@@ -107,7 +106,7 @@ async def complete_twitter_login(uinfo: Dict, user_agent: str | None, ip: str | 
     user = await ensure_user_for_oauth(email=email, name=name or username, avatar_url=avatar)
 
     sec = get_security_config()
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     refresh_expires_at = now + timedelta(days=sec["REFRESH_TOKEN_EXPIRES_DAYS"])
 
     client_ip = _normalize_ip(ip)

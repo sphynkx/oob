@@ -1,24 +1,24 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from ipaddress import ip_address
 
-from db.users_db import get_user_by_email, create_user, get_user_by_id
 from db.sessions_db import (
     create_session_placeholder,
-    set_session_token_hash,
     get_session_by_id,
-    rotate_session,
-    revoke_session,
     revoke_all_sessions_for_user,
+    revoke_session,
+    rotate_session,
+    set_session_token_hash,
 )
+from db.users_db import create_user, get_user_by_email, get_user_by_id
 from utils.security_ut import (
-    hash_password,
-    verify_password,
     create_access_token,
     generate_refresh_token_for_session,
+    get_security_config,
+    hash_password,
     hash_refresh_token,
     parse_refresh_token,
+    verify_password,
     verify_refresh_token_hash,
-    get_security_config,
 )
 
 
@@ -53,7 +53,7 @@ async def login_user_service(email, password, user_agent, ip):
     if not verify_password(password, user["password_hash"]):
         raise ValueError("Invalid credentials")
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     refresh_expires_at = now + timedelta(days=sec["REFRESH_TOKEN_EXPIRES_DAYS"])
 
     client_ip = _normalize_ip(ip)
@@ -87,7 +87,7 @@ async def refresh_token_service(refresh_token):
         raise ValueError("Invalid session")
     if session.get("revoked_at"):
         raise ValueError("Session revoked")
-    if session["expires_at"] <= datetime.now(timezone.utc):
+    if session["expires_at"] <= datetime.now(UTC):
         raise ValueError("Session expired")
 
     if not verify_refresh_token_hash(refresh_token, session["refresh_token_hash"]):
@@ -95,7 +95,7 @@ async def refresh_token_service(refresh_token):
 
     new_refresh_token = generate_refresh_token_for_session(session_id)
     new_hash = hash_refresh_token(new_refresh_token)
-    new_expires_at = datetime.now(timezone.utc) + timedelta(days=sec["REFRESH_TOKEN_EXPIRES_DAYS"])
+    new_expires_at = datetime.now(UTC) + timedelta(days=sec["REFRESH_TOKEN_EXPIRES_DAYS"])
     await rotate_session(session_id, new_hash, new_expires_at)
 
     access_token = create_access_token(session["user_id"])
@@ -130,7 +130,7 @@ async def get_user_by_refresh_token_service(refresh_token: str):
         raise ValueError("Invalid session")
     if session.get("revoked_at"):
         raise ValueError("Session revoked")
-    if session["expires_at"] <= datetime.now(timezone.utc):
+    if session["expires_at"] <= datetime.now(UTC):
         raise ValueError("Session expired")
     if not verify_refresh_token_hash(refresh_token, session["refresh_token_hash"]):
         raise ValueError("Invalid refresh token")
