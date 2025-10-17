@@ -3,7 +3,7 @@ services:
     image: postgres:16
     restart: always
     env_file:
-      - ./install/docker/.env.db
+      - ./.env.db
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -14,13 +14,11 @@ services:
 
   app:
     build:
-      context: .
+      context: ../..
       dockerfile: install/docker/Dockerfile
     env_file:
       - ./.env
       - ./.env.db
-    environment:
-      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}"
     ports:
       - "8010:8010"
     depends_on:

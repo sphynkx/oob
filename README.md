@@ -110,7 +110,8 @@ and set all necessary values (JWT_SECRET, POSTGRES_PASSWORD, etc.)
 
 Build images and start containers:
 ```bash
-docker compose -f install/docker/docker-compose.yml up -d --build
+cd install/docker
+docker compose -f docker-compose.yml up -d --build
 ```
 Check logs:
 ```bash

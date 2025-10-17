@@ -9,8 +9,8 @@ static/logs/*
 !static/logs/.gitkeep
 static/logs/*.log
 static/icon.ico
-conf.py
-config.py
+##conf.py
+##config.py
 install/conf.py
 install/config.py
 grant-priv.sql
