@@ -1,24 +1,34 @@
 from datetime import datetime, timedelta, timezone
+from ipaddress import ip_address
 
+from db.users_db import get_user_by_email, create_user, get_user_by_id
 from db.sessions_db import (
     create_session_placeholder,
-    get_session_by_id,
-    revoke_all_sessions_for_user,
-    revoke_session,
-    rotate_session,
     set_session_token_hash,
+    get_session_by_id,
+    rotate_session,
+    revoke_session,
+    revoke_all_sessions_for_user,
 )
-from db.users_db import create_user, get_user_by_email, get_user_by_id
 from utils.security_ut import (
+    hash_password,
+    verify_password,
     create_access_token,
     generate_refresh_token_for_session,
-    get_security_config,
-    hash_password,
     hash_refresh_token,
     parse_refresh_token,
-    verify_password,
     verify_refresh_token_hash,
+    get_security_config,
 )
+
+
+def _normalize_ip(ip: str | None) -> str | None:
+    if not ip:
+        return None
+    try:
+        return str(ip_address(ip))
+    except ValueError:
+        return None
 
 
 async def register_user_service(email, password, name):
@@ -45,7 +55,9 @@ async def login_user_service(email, password, user_agent, ip):
 
     now = datetime.now(timezone.utc)
     refresh_expires_at = now + timedelta(days=sec["REFRESH_TOKEN_EXPIRES_DAYS"])
-    placeholder = await create_session_placeholder(user["id"], user_agent, ip, refresh_expires_at)
+
+    client_ip = _normalize_ip(ip)
+    placeholder = await create_session_placeholder(user["id"], user_agent, client_ip, refresh_expires_at)
 
     session_id = placeholder["id"]
     refresh_token = generate_refresh_token_for_session(session_id)

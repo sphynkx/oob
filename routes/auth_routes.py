@@ -1,18 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from services.auth_service import (
-    login_user_service,
-    logout_all_service,
-    logout_current_service,
-    refresh_token_service,
-    register_user_service,
-)
-from utils.schemas_ut import LoginRequest, LogoutRequest, MeResponse, RegisterRequest, TokenResponse
+from utils.schemas_ut import RegisterRequest, LoginRequest, TokenResponse, MeResponse, LogoutRequest
 from utils.security_ut import (
     get_current_user,
     get_refresh_cookie_name,
     get_user_from_token,
+)
+from services.auth_service import (
+    register_user_service,
+    login_user_service,
+    refresh_token_service,
+    logout_current_service,
+    logout_all_service,
 )
 
 router = APIRouter()
@@ -39,14 +39,20 @@ async def login(payload: LoginRequest, request: Request, response: Response):
         user_agent = request.headers.get("user-agent", "")
         client_ip = request.client.host if request.client else None
         tokens = await login_user_service(payload.email, payload.password, user_agent, client_ip)
+
         cookie_name = get_refresh_cookie_name()
+        cookie_domain = tokens["cookie_domain"] or None  ## do not set invalid empty domain
+        cookie_secure = tokens["cookie_secure"]
+        if request.url.scheme != "https":
+            cookie_secure = False
+
         response.set_cookie(
             key=cookie_name,
             value=tokens["refresh_token"],
             httponly=True,
-            secure=tokens["cookie_secure"],
+            secure=cookie_secure,
             samesite=tokens["cookie_samesite"],
-            domain=tokens["cookie_domain"],
+            domain=cookie_domain,
             path="/",
             max_age=tokens["refresh_max_age"],
         )
@@ -60,18 +66,22 @@ async def refresh(request: Request, response: Response):
     cookie_name = get_refresh_cookie_name()
     refresh_token = request.cookies.get(cookie_name)
     if not refresh_token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing refresh token"
-        )
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing refresh token")
     try:
         result = await refresh_token_service(refresh_token)
+
+        cookie_domain = result["cookie_domain"] or None  ## do not set invalid empty domain
+        cookie_secure = result["cookie_secure"]
+        if request.url.scheme != "https":
+            cookie_secure = False
+
         response.set_cookie(
             key=cookie_name,
             value=result["refresh_token"],
             httponly=True,
-            secure=result["cookie_secure"],
+            secure=cookie_secure,
             samesite=result["cookie_samesite"],
-            domain=result["cookie_domain"],
+            domain=cookie_domain,
             path="/",
             max_age=result["refresh_max_age"],
         )

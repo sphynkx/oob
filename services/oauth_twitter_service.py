@@ -1,5 +1,6 @@
 import base64
 from datetime import datetime, timedelta, timezone
+from ipaddress import ip_address
 from typing import Dict
 
 import httpx
@@ -18,6 +19,15 @@ from utils.security_ut import (
 def _basic_auth_header(client_id: str, client_secret: str) -> str:
     raw = f"{client_id}:{client_secret}".encode("ascii")
     return "Basic " + base64.b64encode(raw).decode("ascii")
+
+
+def _normalize_ip(ip: str | None) -> str | None:
+    if not ip:
+        return None
+    try:
+        return str(ip_address(ip))
+    except ValueError:
+        return None
 
 
 async def build_twitter_auth_url(state: str, code_challenge: str) -> str:
@@ -100,9 +110,8 @@ async def complete_twitter_login(uinfo: Dict, user_agent: str | None, ip: str | 
     now = datetime.now(timezone.utc)
     refresh_expires_at = now + timedelta(days=sec["REFRESH_TOKEN_EXPIRES_DAYS"])
 
-    placeholder = await create_session_placeholder(
-        user["id"], user_agent or "", ip, refresh_expires_at
-    )
+    client_ip = _normalize_ip(ip)
+    placeholder = await create_session_placeholder(user["id"], user_agent or "", client_ip, refresh_expires_at)
     session_id = placeholder["id"]
 
     refresh_token = generate_refresh_token_for_session(session_id)
