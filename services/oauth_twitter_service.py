@@ -100,7 +100,9 @@ async def complete_twitter_login(uinfo: Dict, user_agent: str | None, ip: str | 
     now = datetime.now(timezone.utc)
     refresh_expires_at = now + timedelta(days=sec["REFRESH_TOKEN_EXPIRES_DAYS"])
 
-    placeholder = await create_session_placeholder(user["id"], user_agent or "", ip, refresh_expires_at)
+    placeholder = await create_session_placeholder(
+        user["id"], user_agent or "", ip, refresh_expires_at
+    )
     session_id = placeholder["id"]
 
     refresh_token = generate_refresh_token_for_session(session_id)

@@ -104,4 +104,3 @@ async def count_products_by_seller_db(seller_id):
     async with pool.acquire() as conn:
         val = await conn.fetchval("SELECT COUNT(*) FROM products WHERE seller_id=$1", seller_id)
         return int(val or 0)
-

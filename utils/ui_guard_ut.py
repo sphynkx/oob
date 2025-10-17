@@ -88,9 +88,16 @@ class UiAuthRedirectMiddleware(BaseHTTPMiddleware):
                 "/login,/register,/health,/static,/docs,/openapi.json,/redoc,/favicon.ico",
             )
         )
-        self.protected_prefixes = _csv_to_set(cfg.get("UI_PROTECTED_PREFIXES", "/dashboard,/products"))
+        self.protected_prefixes = _csv_to_set(
+            cfg.get("UI_PROTECTED_PREFIXES", "/dashboard,/products")
+        )
         self.skip_prefixes = _csv_to_set(cfg.get("UI_SKIP_PREFIXES", "/api,/auth"))
-        self.enable_root_redirect = str(cfg.get("UI_ROOT_REDIRECT", "true")).lower() in ("1", "true", "yes", "on")
+        self.enable_root_redirect = str(cfg.get("UI_ROOT_REDIRECT", "true")).lower() in (
+            "1",
+            "true",
+            "yes",
+            "on",
+        )
 
     async def dispatch(self, request: Request, call_next):
         path = request.url.path or "/"

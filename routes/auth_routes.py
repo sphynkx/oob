@@ -1,18 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from utils.schemas_ut import RegisterRequest, LoginRequest, TokenResponse, MeResponse, LogoutRequest
+from services.auth_service import (
+    login_user_service,
+    logout_all_service,
+    logout_current_service,
+    refresh_token_service,
+    register_user_service,
+)
+from utils.schemas_ut import LoginRequest, LogoutRequest, MeResponse, RegisterRequest, TokenResponse
 from utils.security_ut import (
     get_current_user,
     get_refresh_cookie_name,
     get_user_from_token,
-)
-from services.auth_service import (
-    register_user_service,
-    login_user_service,
-    refresh_token_service,
-    logout_current_service,
-    logout_all_service,
 )
 
 router = APIRouter()
@@ -60,7 +60,9 @@ async def refresh(request: Request, response: Response):
     cookie_name = get_refresh_cookie_name()
     refresh_token = request.cookies.get(cookie_name)
     if not refresh_token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing refresh token")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing refresh token"
+        )
     try:
         result = await refresh_token_service(refresh_token)
         response.set_cookie(
@@ -112,4 +114,3 @@ async def me(user=Depends(get_current_user)):
         "avatar_url": user["avatar_url"],
         "role": user.get("role"),
     }
-

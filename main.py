@@ -5,14 +5,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
 from config import get_config
-from db import init_database, close_database
+from db import close_database, init_database
 from routes.auth_routes import router as auth_router
 from routes.auth_sessions_routes import router as auth_sessions_router
 from routes.health_routes import router as health_router
-from routes.products_routes import router as products_router
-from routes.ui_routes import router as ui_router
 from routes.oauth_google_routes import router as oauth_google_router
 from routes.oauth_twitter_routes import router as oauth_twitter_router
+from routes.products_routes import router as products_router
+from routes.ui_routes import router as ui_router
 from utils.ui_guard_ut import UiAuthRedirectMiddleware
 
 

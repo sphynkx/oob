@@ -1,23 +1,23 @@
 from datetime import datetime, timedelta, timezone
 
-from db.users_db import get_user_by_email, create_user, get_user_by_id
 from db.sessions_db import (
     create_session_placeholder,
-    set_session_token_hash,
     get_session_by_id,
-    rotate_session,
-    revoke_session,
     revoke_all_sessions_for_user,
+    revoke_session,
+    rotate_session,
+    set_session_token_hash,
 )
+from db.users_db import create_user, get_user_by_email, get_user_by_id
 from utils.security_ut import (
-    hash_password,
-    verify_password,
     create_access_token,
     generate_refresh_token_for_session,
+    get_security_config,
+    hash_password,
     hash_refresh_token,
     parse_refresh_token,
+    verify_password,
     verify_refresh_token_hash,
-    get_security_config,
 )
 
 
@@ -122,4 +122,3 @@ async def get_user_by_refresh_token_service(refresh_token: str):
         raise ValueError("Invalid refresh token")
     user = await get_user_by_id(session["user_id"])
     return user
-

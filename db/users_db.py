@@ -56,7 +56,9 @@ async def update_user_profile(user_id: int, name: str | None = None, avatar_url:
         await conn.execute(sql, *args)
 
 
-async def ensure_user_for_oauth(email: str, name: str | None, avatar_url: str | None, role: str = "buyer"):
+async def ensure_user_for_oauth(
+    email: str, name: str | None, avatar_url: str | None, role: str = "buyer"
+):
     """
     Returns user dict. If not exists - creates with empty password_hash (blocks password login).
     If exists - updates name/avatar if changed.
@@ -64,7 +66,9 @@ async def ensure_user_for_oauth(email: str, name: str | None, avatar_url: str | 
     existing = await get_user_by_email(email)
     if existing:
         to_update_name = name if (name and name != existing.get("name")) else None
-        to_update_avatar = avatar_url if (avatar_url and avatar_url != existing.get("avatar_url")) else None
+        to_update_avatar = (
+            avatar_url if (avatar_url and avatar_url != existing.get("avatar_url")) else None
+        )
         if to_update_name is not None or to_update_avatar is not None:
             await update_user_profile(existing["id"], to_update_name, to_update_avatar)
             return await get_user_by_email(email)
@@ -75,4 +79,3 @@ async def ensure_user_for_oauth(email: str, name: str | None, avatar_url: str | 
         await update_user_profile(user["id"], None, avatar_url)
         user = await get_user_by_email(email)
     return user
-

@@ -1,4 +1,4 @@
-from db.sessions_db import list_sessions_for_user, get_session_by_id, revoke_session
+from db.sessions_db import get_session_by_id, list_sessions_for_user, revoke_session
 
 
 async def list_user_sessions_service(user_id):

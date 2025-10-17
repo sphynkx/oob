@@ -1,8 +1,8 @@
-import os
-from typing import Tuple
-import hmac
 import base64
+import hmac
+import os
 from hashlib import sha256
+from typing import Tuple
 
 from config import get_config
 
@@ -42,4 +42,3 @@ def verify_state(state: str) -> bool:
     secret = cfg["CSRF_SECRET"].encode("utf-8")
     expected = _sign(rnd, secret)
     return hmac.compare_digest(sig, expected)
-

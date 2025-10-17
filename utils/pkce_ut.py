@@ -1,6 +1,6 @@
-import os
 import base64
 import hashlib
+import os
 
 
 def _b64u(b: bytes) -> str:
@@ -14,4 +14,3 @@ def create_code_verifier() -> str:
 def create_code_challenge_s256(code_verifier: str) -> str:
     h = hashlib.sha256(code_verifier.encode("ascii")).digest()
     return _b64u(h)
-

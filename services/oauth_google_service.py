@@ -1,13 +1,14 @@
-import httpx
 from datetime import datetime, timedelta, timezone
+
+import httpx
 
 from config import get_config
 from db.sessions_db import create_session_placeholder, set_session_token_hash
 from db.users_db import ensure_user_for_oauth
 from utils.security_ut import (
     create_access_token,
-    get_security_config,
     generate_refresh_token_for_session,
+    get_security_config,
     hash_refresh_token,
 )
 
@@ -49,7 +50,9 @@ async def fetch_userinfo(access_token: str) -> dict:
     cfg = get_config()
     url = cfg["OAUTH_GOOGLE_USERINFO_URL"]
     async with httpx.AsyncClient(timeout=15) as client:
-        r = await client.get(url, headers={"Authorization": f"Bearer {access_token}", "Accept": "application/json"})
+        r = await client.get(
+            url, headers={"Authorization": f"Bearer {access_token}", "Accept": "application/json"}
+        )
         r.raise_for_status()
         return r.json()
 
@@ -73,7 +76,9 @@ async def complete_google_login(userinfo: dict, user_agent: str | None, ip: str 
     refresh_expires_at = now + timedelta(days=sec["REFRESH_TOKEN_EXPIRES_DAYS"])
 
     ## Create session placeholder with proper expires_at (NOT NULL)
-    placeholder = await create_session_placeholder(user["id"], user_agent or "", ip, refresh_expires_at)
+    placeholder = await create_session_placeholder(
+        user["id"], user_agent or "", ip, refresh_expires_at
+    )
     session_id = placeholder["id"]
 
     ## Rotate refresh token

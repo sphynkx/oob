@@ -1,15 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from utils.schemas_ut import ProductCreate, ProductUpdate, ProductOut
-from utils.security_ut import get_current_user
 from services.products_service import (
     create_product_service,
-    list_products_service,
-    get_product_service,
-    update_product_service,
     delete_product_service,
+    get_product_service,
     get_products_stats_service,
+    list_products_service,
+    update_product_service,
 )
+from utils.schemas_ut import ProductCreate, ProductOut, ProductUpdate
+from utils.security_ut import get_current_user
 
 router = APIRouter()
 
@@ -79,4 +79,3 @@ async def delete_product(product_id: int, user=Depends(get_current_user)):
         return
     except PermissionError:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
-

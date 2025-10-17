@@ -50,4 +50,3 @@ def verify_csrf(token_from_form: str, token_from_cookie: str) -> bool:
     secret = cfg["CSRF_SECRET"].encode("utf-8")
     expected = _sign(nonce, secret)
     return hmac.compare_digest(sig, expected)
-

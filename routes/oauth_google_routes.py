@@ -2,9 +2,14 @@ from fastapi import APIRouter, HTTPException, Request, Response, status
 from fastapi.responses import RedirectResponse
 
 from config import get_config
-from services.oauth_google_service import build_google_auth_url, exchange_code_for_tokens, fetch_userinfo, complete_google_login
-from utils.state_ut import create_state, verify_state
+from services.oauth_google_service import (
+    build_google_auth_url,
+    complete_google_login,
+    exchange_code_for_tokens,
+    fetch_userinfo,
+)
 from utils.security_ut import get_refresh_cookie_name
+from utils.state_ut import create_state, verify_state
 
 router = APIRouter(prefix="/oauth")
 
@@ -14,7 +19,9 @@ async def oauth_google_start(request: Request):
     state = create_state()
     ## set short-lived state cookie (5 min)
     cfg = get_config()
-    resp = RedirectResponse(url="/", status_code=302)  ## temporary, will be replaced after compute url
+    resp = RedirectResponse(
+        url="/", status_code=302
+    )  ## temporary, will be replaced after compute url
     resp.set_cookie(
         key="oauth_state",
         value=state,
@@ -36,7 +43,13 @@ async def oauth_google_callback(request: Request):
     state_cookie = request.cookies.get("oauth_state", "")
     state_param = request.query_params.get("state", "")
     code = request.query_params.get("code", "")
-    if not code or not state_param or not state_cookie or state_cookie != state_param or not verify_state(state_param):
+    if (
+        not code
+        or not state_param
+        or not state_cookie
+        or state_cookie != state_param
+        or not verify_state(state_param)
+    ):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid state")
 
     try:

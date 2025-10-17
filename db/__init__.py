@@ -1,5 +1,7 @@
-import asyncpg
 from pathlib import Path
+
+import asyncpg
+
 from config import get_config
 
 POOL = None

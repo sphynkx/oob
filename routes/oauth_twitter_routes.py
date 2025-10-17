@@ -4,13 +4,13 @@ from fastapi.responses import RedirectResponse
 from config import get_config
 from services.oauth_twitter_service import (
     build_twitter_auth_url,
+    complete_twitter_login,
     exchange_code_for_tokens,
     fetch_userinfo,
-    complete_twitter_login,
 )
-from utils.state_ut import create_state, verify_state
-from utils.pkce_ut import create_code_verifier, create_code_challenge_s256
+from utils.pkce_ut import create_code_challenge_s256, create_code_verifier
 from utils.security_ut import get_refresh_cookie_name
+from utils.state_ut import create_state, verify_state
 
 router = APIRouter(prefix="/oauth")
 
@@ -56,7 +56,14 @@ async def oauth_twitter_callback(request: Request):
     code = request.query_params.get("code", "")
     code_verifier = request.cookies.get("oauth_tw_pkce", "")
 
-    if not code or not code_verifier or not state_param or not state_cookie or state_cookie != state_param or not verify_state(state_param):
+    if (
+        not code
+        or not code_verifier
+        or not state_param
+        or not state_cookie
+        or state_cookie != state_param
+        or not verify_state(state_param)
+    ):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid state or PKCE")
 
     try:
@@ -86,4 +93,3 @@ async def oauth_twitter_callback(request: Request):
     resp.delete_cookie(key="oauth_state_tw", path="/")
     resp.delete_cookie(key="oauth_tw_pkce", path="/")
     return resp
-

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from utils.security_ut import get_current_user
+
 from services.auth_sessions_service import list_user_sessions_service, revoke_user_session_service
+from utils.security_ut import get_current_user
 
 router = APIRouter(prefix="/auth")
 

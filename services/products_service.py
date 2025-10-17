@@ -1,13 +1,14 @@
-from db.products_db import (
-    create_product_db,
-    list_products_db,
-    get_product_db,
-    update_product_db,
-    delete_product_db,
-    count_products_total_db,
-    count_products_by_seller_db,
-)
 import logging
+
+from db.products_db import (
+    count_products_by_seller_db,
+    count_products_total_db,
+    create_product_db,
+    delete_product_db,
+    get_product_db,
+    list_products_db,
+    update_product_db,
+)
 
 logger = logging.getLogger("oob")
 
@@ -31,7 +32,13 @@ async def create_product_service(user, title, description, price, currency, imag
     if not title or price is None:
         raise ValueError("Title and price are required")
     currency_val = currency or "USD"
-    logger.info("svc: create_product user_id=%s title=%r price=%s currency=%r", user["id"], title, price, currency_val)
+    logger.info(
+        "svc: create_product user_id=%s title=%r price=%s currency=%r",
+        user["id"],
+        title,
+        price,
+        currency_val,
+    )
     product = await create_product_db(
         user["id"],
         title,
@@ -100,4 +107,3 @@ async def get_products_stats_service(user_id):
     total = await count_products_total_db()
     mine = await count_products_by_seller_db(user_id)
     return {"total": total, "mine": mine}
-

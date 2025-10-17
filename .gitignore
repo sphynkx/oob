@@ -18,3 +18,4 @@ install/grant-priv.sql
 install/setup.js
 setup.js
 *.log
+tests/.env

@@ -1,27 +1,27 @@
 from typing import Optional
 
-from fastapi import APIRouter, Request, Response, HTTPException, status
+from fastapi import APIRouter, HTTPException, Request, Response, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from config import get_config
 from services.auth_service import (
     login_user_service,
-    register_user_service,
     logout_current_service,
+    register_user_service,
 )
 from services.products_service import (
-    list_products_service,
     create_product_service,
     delete_product_service,
     get_products_stats_service,
+    list_products_service,
 )
+from utils.csrf_ut import create_csrf_pair, verify_csrf
 from utils.security_ut import get_refresh_cookie_name
 from utils.ui_guard_ut import (
     _get_user_from_refresh_cookie,
     get_user_from_refresh_cookie_request_sync_state,
 )
-from utils.csrf_ut import create_csrf_pair, verify_csrf
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -49,7 +49,9 @@ async def root(request: Request):
 @router.get("/login", response_class=HTMLResponse, include_in_schema=False)
 async def login_page(request: Request):
     csrf_form, csrf_cookie = create_csrf_pair()
-    resp = templates.TemplateResponse("login.html", {"request": request, "title": "Login", "csrf_token": csrf_form})
+    resp = templates.TemplateResponse(
+        "login.html", {"request": request, "title": "Login", "csrf_token": csrf_form}
+    )
     _set_csrf_cookie(resp, csrf_cookie)
     return resp
 
@@ -111,7 +113,9 @@ async def login_submit(request: Request):
 @router.get("/register", response_class=HTMLResponse, include_in_schema=False)
 async def register_page(request: Request):
     csrf_form, csrf_cookie = create_csrf_pair()
-    resp = templates.TemplateResponse("register.html", {"request": request, "title": "Register", "csrf_token": csrf_form})
+    resp = templates.TemplateResponse(
+        "register.html", {"request": request, "title": "Register", "csrf_token": csrf_form}
+    )
     _set_csrf_cookie(resp, csrf_cookie)
     return resp
 
@@ -155,7 +159,13 @@ async def register_submit(request: Request):
         csrf_form2, csrf_cookie2 = create_csrf_pair()
         resp = templates.TemplateResponse(
             "register.html",
-            {"request": request, "title": "Register", "error": str(e), "form": {"email": email, "name": name}, "csrf_token": csrf_form2},
+            {
+                "request": request,
+                "title": "Register",
+                "error": str(e),
+                "form": {"email": email, "name": name},
+                "csrf_token": csrf_form2,
+            },
             status_code=400,
         )
         _set_csrf_cookie(resp, csrf_cookie2)
@@ -198,7 +208,12 @@ async def dashboard_page(request: Request):
     ctx = {
         "request": request,
         "title": "Dashboard",
-        "me": {"id": user["id"], "email": user["email"], "name": user["name"], "role": user.get("role")},
+        "me": {
+            "id": user["id"],
+            "email": user["email"],
+            "name": user["name"],
+            "role": user.get("role"),
+        },
         "stats": stats,
         "csrf_token": csrf_form,
     }
@@ -212,7 +227,13 @@ async def products_page(request: Request):
     user = get_user_from_refresh_cookie_request_sync_state(request)
     products = await list_products_service(limit=100, offset=0)
     csrf_form, csrf_cookie = create_csrf_pair()
-    ctx = {"request": request, "title": "Products", "me": user, "products": products, "csrf_token": csrf_form}
+    ctx = {
+        "request": request,
+        "title": "Products",
+        "me": user,
+        "products": products,
+        "csrf_token": csrf_form,
+    }
     resp = templates.TemplateResponse("products.html", ctx)
     _set_csrf_cookie(resp, csrf_cookie)
     return resp
@@ -316,4 +337,3 @@ async def product_new_submit(request: Request) -> Response:
         resp = templates.TemplateResponse("product_new.html", ctx, status_code=400)
         _set_csrf_cookie(resp, csrf_cookie2)
         return resp
-
