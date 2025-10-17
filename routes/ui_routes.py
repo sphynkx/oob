@@ -179,7 +179,7 @@ async def logout_ui(request: Request) -> Response:
             pass
     resp = RedirectResponse(url="/login", status_code=303)
     resp.delete_cookie(key=cookie_name, path="/")
-    # rotate CSRF after logout
+    ## rotate CSRF after logout
     csrf_form2, csrf_cookie2 = create_csrf_pair()
     _set_csrf_cookie(resp, csrf_cookie2)
     return resp
@@ -238,12 +238,16 @@ async def product_delete_ui(product_id: int, request: Request) -> Response:
 
 @router.get("/products/new", response_class=HTMLResponse, include_in_schema=False)
 async def product_new_page(request: Request):
-    user = await _get_user_from_refresh_cookie(request)
+    user = get_user_from_refresh_cookie_request_sync_state(request)
     if user is None:
-        return RedirectResponse(url="/login", status_code=302)
+        user = await _get_user_from_refresh_cookie(request)
+        if user is None:
+            return RedirectResponse(url="/login", status_code=302)
+
     role = (user.get("role") or "").lower()
     if role not in ("seller", "admin"):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+
     csrf_form, csrf_cookie = create_csrf_pair()
     resp = templates.TemplateResponse("product_new.html", {"request": request, "title": "Create product", "csrf_token": csrf_form})
     _set_csrf_cookie(resp, csrf_cookie)
