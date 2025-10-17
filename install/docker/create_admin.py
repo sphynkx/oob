@@ -9,12 +9,21 @@ from db.users_db import get_user_by_email, create_user
 from utils.security_ut import hash_password
 
 
-async def upsert_user(email: str, password: Optional[str], name: Optional[str], role: str):
+def _isatty() -> bool:
+    try:
+        return sys.stdin.isatty()
+    except Exception:
+        return False
+
+
+async def upsert_user(email: str, password: Optional[str], name: Optional[str], role: str) -> int:
     await init_database()
     try:
         email_lc = (email or "").strip().lower()
         if not email_lc:
-            raise ValueError("Email is required")
+            print("ERROR: email is required", file=sys.stderr)
+            return 2
+
         user = await get_user_by_email(email_lc)
         if user:
             sets = []
@@ -39,15 +48,9 @@ async def upsert_user(email: str, password: Optional[str], name: Optional[str], 
             if role and role.lower() != "buyer":
                 await get_pool().execute("UPDATE users SET role=$1 WHERE id=$2", role, new_user["id"])
             print(f"Created user {email_lc} with role={role or 'buyer'}")
+        return 0
     finally:
         await close_database()
-
-
-def _isatty() -> bool:
-    try:
-        return sys.stdin.isatty()
-    except Exception:
-        return False
 
 
 def main():
@@ -58,26 +61,36 @@ def main():
     parser.add_argument("--role", default="admin", choices=["buyer", "seller", "admin"], help="User role")
     args = parser.parse_args()
 
-    email = args.email or os.getenv("ADMIN_EMAIL")
-    password = args.password or os.getenv("ADMIN_PASSWORD")
+    ## Prefer CLI args, then env, then prompt (only if TTY)
+    email = args.email or os.getenv("ADMIN_EMAIL", "")
+    password = args.password or os.getenv("ADMIN_PASSWORD", "")
     name = args.name or os.getenv("ADMIN_NAME", "Admin")
     role = args.role or os.getenv("ADMIN_ROLE", "admin")
 
     if not email and _isatty():
         email = input("Admin email: ").strip()
+
     if not password and _isatty():
         try:
             import getpass
-
             password = getpass.getpass("Admin password: ")
         except Exception:
             password = input("Admin password: ")
 
     if not email:
-        print("ERROR: email is required (pass --email or set ADMIN_EMAIL)")
+        print("ERROR: email is required (pass --email or set ADMIN_EMAIL). "
+              "Non-interactive mode detected (no TTY).", file=sys.stderr)
         sys.exit(2)
 
-    asyncio.run(upsert_user(email=email, password=password, name=name, role=role))
+    ## In non-interactive mode, allow empty password to only set role on existing user
+    if not password and _isatty():
+        confirm = input("Empty password. Proceed with role-only update if user exists? [y/N]: ").strip().lower()
+        if confirm not in ("y", "yes"):
+            print("Aborted.", file=sys.stderr)
+            sys.exit(3)
+
+    rc = asyncio.run(upsert_user(email=email, password=password or None, name=name, role=role))
+    sys.exit(rc)
 
 
 if __name__ == "__main__":
