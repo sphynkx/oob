@@ -92,3 +92,32 @@ systemctl daemon-reload
 systemctl enable oob.service
 systemctl start oob.service
 ```
+
+
+## Docker install
+
+### Preconfig
+
+Copy sample files:
+```bash
+cp install/docker/.env.example install/docker/.env
+cp install/docker/.env.db.example install/docker/.env.db
+```
+and set all necessary values (JWT_SECRET, POSTGRES_PASSWORD, etc.)
+
+
+### Build and run
+
+Build images and start containers:
+```bash
+docker compose -f install/docker/docker-compose.yml up -d --build
+```
+Check logs:
+```bash
+docker compose -f install/docker/docker-compose.yml logs -f app
+docker compose -f install/docker/docker-compose.yml logs -f db
+```
+
+### Access
+
+http://localhost:8010
