@@ -81,3 +81,14 @@ Check:
 ```bash
 curl https://oob.sphynkx.org.ua/health
 ```
+
+
+### Systemd
+
+If everything is OK configure service:
+```bash
+cp install/systemd/oob.service /etc/systemd/system/oob.service
+systemctl daemon-reload
+systemctl enable oob.service
+systemctl start oob.service
+```
