@@ -4,6 +4,7 @@ from fastapi import APIRouter, Request, Response, HTTPException, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
+from config import get_config
 from services.auth_service import (
     login_user_service,
     register_user_service,
@@ -21,7 +22,6 @@ from utils.ui_guard_ut import (
     get_user_from_refresh_cookie_request_sync_state,
 )
 from utils.csrf_ut import create_csrf_pair, verify_csrf
-from config import get_config
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -249,7 +249,10 @@ async def product_new_page(request: Request):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
 
     csrf_form, csrf_cookie = create_csrf_pair()
-    resp = templates.TemplateResponse("product_new.html", {"request": request, "title": "Create product", "csrf_token": csrf_form})
+    resp = templates.TemplateResponse(
+        "product_new.html",
+        {"request": request, "title": "Create product", "csrf_token": csrf_form},
+    )
     _set_csrf_cookie(resp, csrf_cookie)
     return resp
 
@@ -262,9 +265,13 @@ async def product_new_submit(request: Request) -> Response:
     if not verify_csrf(csrf_form_token, csrf_cookie):
         return RedirectResponse(url="/products", status_code=303)
 
-    user = await _get_user_from_refresh_cookie(request)
+    ## Read user from request.state first (middleware), then fallback to cookie
+    user = get_user_from_refresh_cookie_request_sync_state(request)
+    if user is None:
+        user = await _get_user_from_refresh_cookie(request)
     if user is None:
         return RedirectResponse(url="/login", status_code=302)
+
     role = (user.get("role") or "").lower()
     if role not in ("seller", "admin"):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
@@ -297,7 +304,13 @@ async def product_new_submit(request: Request) -> Response:
             "request": request,
             "title": "Create product",
             "error": str(e),
-            "form": {"title": title, "description": description, "price": price, "currency": currency, "image_url": image_url or ""},
+            "form": {
+                "title": title,
+                "description": description,
+                "price": price,
+                "currency": currency,
+                "image_url": image_url or "",
+            },
             "csrf_token": csrf_form2,
         }
         resp = templates.TemplateResponse("product_new.html", ctx, status_code=400)

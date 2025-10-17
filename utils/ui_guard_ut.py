@@ -75,7 +75,7 @@ class UiAuthRedirectMiddleware(BaseHTTPMiddleware):
       - protected prefixes -> /login if not authenticated
       - /login or /register -> /dashboard if authenticated
     Skips API and static paths.
-    Also attaches request.state.user for convenience on GET HTML routes.
+    Also attaches request.state.user for convenience on HTML routes.
     """
 
     def __init__(self, app):
@@ -104,10 +104,9 @@ class UiAuthRedirectMiddleware(BaseHTTPMiddleware):
         if _starts_with(self.skip_prefixes):
             return await call_next(request)
 
-        ## Attach user on GET HTML routes when possible
-        if request.method == "GET":
-            user = await _get_user_from_refresh_cookie(request)
-            setattr(request.state, "user", user)
+        ## Attach user on all HTML routes (GET/POST/etc.)
+        user = await _get_user_from_refresh_cookie(request)
+        setattr(request.state, "user", user)
 
         ## Root redirect
         if self.enable_root_redirect and path == "/":
@@ -129,4 +128,3 @@ class UiAuthRedirectMiddleware(BaseHTTPMiddleware):
 
         ## Default allow
         return await call_next(request)
-
