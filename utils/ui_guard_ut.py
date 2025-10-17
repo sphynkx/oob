@@ -101,7 +101,6 @@ class UiAuthRedirectMiddleware(BaseHTTPMiddleware):
                     return True
             return False
 
-        ## Never guard skipped prefixes (API, auth, etc.)
         if _starts_with(self.skip_prefixes):
             return await call_next(request)
 

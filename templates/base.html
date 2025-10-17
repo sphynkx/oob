@@ -5,11 +5,12 @@
   <title>{{ title if title else "oob" }}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link href="/static/css/style.css" rel="stylesheet" />
+  <link href="/static/css/user.css" rel="stylesheet" />
 </head>
 <body>
   <header class="topbar">
-    <div class="container" style="display:flex;align-items:center;justify-content:space-between;">
-      <div style="display:flex;align-items:center;gap:16px;">
+    <div class="container topbar-inner">
+      <div class="nav-left">
         <div class="brand">oob</div>
         <nav class="nav">
           <a href="/">Home</a>
@@ -22,9 +23,20 @@
           {% endif %}
         </nav>
       </div>
-      <nav class="nav">
+      <nav class="nav nav-right">
         {% if request.state.user %}
-          <form method="post" action="/logout" style="display:inline;">
+          <div class="user-chip user-chip--v">
+            <img
+              class="avatar-sm"
+              src="{{ request.state.user.avatar_url if request.state.user.avatar_url else '/static/img/avatar_placeholder.svg' }}"
+              alt="avatar"
+              onerror="this.onerror=null;this.src='/static/img/avatar_placeholder.svg';"
+            />
+            <span class="user-name">
+              {{ request.state.user.name or request.state.user.email }}
+            </span>
+          </div>
+          <form method="post" action="/logout">
             {% if csrf_token %}<input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>{% endif %}
             <button class="btn danger" type="submit">Logout</button>
           </form>

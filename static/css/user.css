@@ -1,0 +1,87 @@
+/* Header layout */
+.topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* User chip */
+.user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-chip--v {
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.avatar-sm {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #e5e7eb;
+  background: #f3f4f6;
+}
+
+.user-name {
+  display: block;
+  text-align: center;
+  font-weight: 600;
+  line-height: 1.1;
+  font-size: 0.9rem;
+}
+
+/* Dashboard avatar block */
+.user-details {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.user-col-avatar {
+  flex: 0 0 auto;
+}
+
+.user-col-info {
+  flex: 1 1 auto;
+}
+
+.avatar-lg {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #e5e7eb;
+  background: #f3f4f6;
+}
+
+.avatar-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.avatar-name {
+  font-weight: 700;
+}
+
+.avatar-email {
+  color: #4b5563;
+  font-size: 0.95rem;
+}

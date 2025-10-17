@@ -21,6 +21,7 @@ from utils.ui_guard_ut import (
     get_user_from_refresh_cookie_request_sync_state,
 )
 from utils.csrf_ut import create_csrf_pair, verify_csrf
+from config import get_config
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -38,9 +39,6 @@ def _set_csrf_cookie(resp: Response, token_cookie_value: str):
         path="/",
         max_age=3600,
     )
-
-
-from config import get_config
 
 
 @router.get("/", response_class=HTMLResponse, include_in_schema=False)
@@ -181,7 +179,7 @@ async def logout_ui(request: Request) -> Response:
             pass
     resp = RedirectResponse(url="/login", status_code=303)
     resp.delete_cookie(key=cookie_name, path="/")
-    ## rotate CSRF after logout
+    # rotate CSRF after logout
     csrf_form2, csrf_cookie2 = create_csrf_pair()
     _set_csrf_cookie(resp, csrf_cookie2)
     return resp

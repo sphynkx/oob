@@ -3,8 +3,9 @@
 <h2>Sign in</h2>
 {% if error %}<div class="msg err">{{ error }}</div>{% endif %}
 
-<div style="margin-bottom:12px;">
+<div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
   <a class="btn" href="/oauth/google/start">Sign in with Google</a>
+  <a class="btn" href="/oauth/twitter/start">Sign in with Twitter</a>
 </div>
 
 <form id="login-form" class="form" method="post" action="/login">

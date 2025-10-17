@@ -5,11 +5,23 @@
 </section>
 
 <section class="panel">
-  <h3>User params</h3>
-  <div class="card">
-    <div class="row"><strong>Email:</strong> <span>{{ me.email }}</span></div>
-    <div class="row"><strong>Name:</strong> <span>{{ me.name }}</span></div>
-    <div class="row"><strong>Role:</strong> <span>{{ me.role }}</span></div>
+  <div class="user-details">
+    <div class="user-col-avatar">
+      <img
+        class="avatar-lg"
+        src="{{ me.avatar_url if me.avatar_url else '/static/img/avatar_placeholder.svg' }}"
+        alt="avatar"
+        onerror="this.onerror=null;this.src='/static/img/avatar_placeholder.svg';"
+      />
+    </div>
+    <div class="user-col-info">
+      <h3>User params</h3>
+      <div class="card">
+        <div class="row"><strong>Email:</strong> <span>{{ me.email }}</span></div>
+        <div class="row"><strong>Name:</strong> <span>{{ me.name }}</span></div>
+        <div class="row"><strong>Role:</strong> <span>{{ me.role }}</span></div>
+      </div>
+    </div>
   </div>
 </section>
 

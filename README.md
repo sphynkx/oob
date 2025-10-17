@@ -23,6 +23,8 @@ Modify `.env` with your own params.
 
 Go to [Google Cloud Console](https://console.cloud.google.com/), create new Web-app, config it, get secrets, set them to `.env` also.
 
+Go to [Twiter Dev Portal](https://developer.x.com/en/portal/petition/essential/basic-info), create new Web-app, config it, get secrets, set them to `.env` also.
+
 
 ### DB
 

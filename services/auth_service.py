@@ -103,3 +103,23 @@ async def logout_current_service(refresh_token):
 
 async def logout_all_service(user_id):
     await revoke_all_sessions_for_user(user_id)
+
+
+async def get_user_by_refresh_token_service(refresh_token: str):
+    """
+    Validates the refresh token against the stored session and returns user dict.
+    This is used by UI middleware to resolve request.state.user from refresh cookie.
+    """
+    session_id, _ = parse_refresh_token(refresh_token)
+    session = await get_session_by_id(session_id)
+    if not session:
+        raise ValueError("Invalid session")
+    if session.get("revoked_at"):
+        raise ValueError("Session revoked")
+    if session["expires_at"] <= datetime.now(timezone.utc):
+        raise ValueError("Session expired")
+    if not verify_refresh_token_hash(refresh_token, session["refresh_token_hash"]):
+        raise ValueError("Invalid refresh token")
+    user = await get_user_by_id(session["user_id"])
+    return user
+

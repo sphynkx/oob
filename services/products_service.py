@@ -7,6 +7,9 @@ from db.products_db import (
     count_products_total_db,
     count_products_by_seller_db,
 )
+import logging
+
+logger = logging.getLogger("oob")
 
 
 def _ensure_seller_or_admin(user):
@@ -28,6 +31,7 @@ async def create_product_service(user, title, description, price, currency, imag
     if not title or price is None:
         raise ValueError("Title and price are required")
     currency_val = currency or "USD"
+    logger.info("svc: create_product user_id=%s title=%r price=%s currency=%r", user["id"], title, price, currency_val)
     product = await create_product_db(
         user["id"],
         title,
@@ -36,6 +40,9 @@ async def create_product_service(user, title, description, price, currency, imag
         currency_val,
         image_url,
     )
+    logger.info("svc: create_product_db -> id=%s", (product or {}).get("id"))
+    if not product:
+        raise RuntimeError("Insert returned no row")
     return product
 
 

@@ -15,7 +15,7 @@ export PYTHONDONTWRITEBYTECODE=1
 
 if [ -f ".env" ]; then
   set -a
-  export $(grep -v '^#' .env | xargs)
+  . ./.env
   set +a
 fi
 

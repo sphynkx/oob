@@ -12,6 +12,7 @@ from routes.health_routes import router as health_router
 from routes.products_routes import router as products_router
 from routes.ui_routes import router as ui_router
 from routes.oauth_google_routes import router as oauth_google_router
+from routes.oauth_twitter_routes import router as oauth_twitter_router
 from utils.ui_guard_ut import UiAuthRedirectMiddleware
 
 
@@ -25,7 +26,7 @@ async def lifespan(app: FastAPI):
 
 
 cfg = get_config()
-app = FastAPI(title="oob", version="0.3.0", lifespan=lifespan)
+app = FastAPI(title="oob", version="0.4.0", lifespan=lifespan)
 
 cors_origins = cfg.get("CORS_ORIGINS", ["*"])
 if isinstance(cors_origins, str):
@@ -51,6 +52,7 @@ app.include_router(ui_router, tags=["ui"])
 
 ## OAuth routes
 app.include_router(oauth_google_router, tags=["oauth"])
+app.include_router(oauth_twitter_router, tags=["oauth"])
 
 ## API routes (JSON)
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
