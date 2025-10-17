@@ -1,7 +1,6 @@
 from pathlib import Path
-
+import os
 import asyncpg
-
 from config import get_config
 
 POOL = None
@@ -30,7 +29,13 @@ async def _apply_schema_from_file(conn):
     sql = schema_path.read_text(encoding="utf-8")
     if not sql.strip():
         return
-    await conn.execute(sql)
+
+    lock_key = int(os.getenv("DB_SCHEMA_LOCK_KEY", "84736251"))
+    try:
+        await conn.execute("SELECT pg_advisory_lock($1)", lock_key)
+        await conn.execute(sql)
+    finally:
+        await conn.execute("SELECT pg_advisory_unlock($1)", lock_key)
 
 
 def get_pool():

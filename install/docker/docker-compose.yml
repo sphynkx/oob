@@ -26,5 +26,19 @@ services:
         condition: service_healthy
     restart: always
 
+  init-admin:
+    profiles: ["init"]
+    build:
+      context: ../..
+      dockerfile: install/docker/Dockerfile
+    env_file:
+      - ./.env
+      - ./.env.db
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["python", "install/docker/create_admin.py", "--role", "admin"]
+    restart: "no"
+
 volumes:
   pgdata:
