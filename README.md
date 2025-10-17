@@ -100,8 +100,8 @@ systemctl start oob.service
 
 Copy sample files:
 ```bash
-cp install/docker/.env.example install/docker/.env
-cp install/docker/.env.db.example install/docker/.env.db
+cp install/docker/.env-sample install/docker/.env
+cp install/docker/.env.db-sample install/docker/.env.db
 ```
 and set all necessary values (JWT_SECRET, POSTGRES_PASSWORD, etc.)
 
