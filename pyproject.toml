@@ -1,12 +1,18 @@
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-extend-select = ["C90"]  # optional: flake8-comprehensions
-ignore = []
+extend-exclude = [
+  ".venv",
+  "install",
+  "static",
+  "templates",
+  "scripts",
+]
 
 [tool.ruff.lint]
-select = ["E","F","W","I","UP","B","SIM"]
-# E,F,W - pycodestyle/pyflakes, I - isort, UP - pyupgrade, B - bugbear, SIM - simplify
+select = ["E", "F", "W", "I", "UP", "B", "SIM"]
+extend-select = ["C90"]  # optional: flake8-comprehensions
+ignore = []
 
 [tool.ruff.format]
 quote-style = "double"

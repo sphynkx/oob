@@ -66,7 +66,9 @@ async def refresh(request: Request, response: Response):
     cookie_name = get_refresh_cookie_name()
     refresh_token = request.cookies.get(cookie_name)
     if not refresh_token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing refresh token")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing refresh token"
+        )
     try:
         result = await refresh_token_service(refresh_token)
 

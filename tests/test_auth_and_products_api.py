@@ -110,4 +110,3 @@ def test_create_product_as_seller_if_env_credentials_provided():
             assert r.status_code == 200, r.text
             got = r.json()
             assert got["id"] == pid
-
