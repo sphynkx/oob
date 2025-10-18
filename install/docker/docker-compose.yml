@@ -37,7 +37,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: ["python", "install/docker/create_admin.py", "--role", "admin"]
+    command: ["python", "-m", "install.docker.create_admin", "--role", "admin"]
     restart: "no"
 
 volumes:

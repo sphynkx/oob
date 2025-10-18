@@ -61,7 +61,6 @@ def main():
     parser.add_argument("--role", default="admin", choices=["buyer", "seller", "admin"], help="User role")
     args = parser.parse_args()
 
-    ## Prefer CLI args, then env, then prompt (only if TTY)
     email = args.email or os.getenv("ADMIN_EMAIL", "")
     password = args.password or os.getenv("ADMIN_PASSWORD", "")
     name = args.name or os.getenv("ADMIN_NAME", "Admin")
@@ -69,7 +68,6 @@ def main():
 
     if not email and _isatty():
         email = input("Admin email: ").strip()
-
     if not password and _isatty():
         try:
             import getpass
@@ -78,16 +76,8 @@ def main():
             password = input("Admin password: ")
 
     if not email:
-        print("ERROR: email is required (pass --email or set ADMIN_EMAIL). "
-              "Non-interactive mode detected (no TTY).", file=sys.stderr)
+        print("ERROR: email is required (pass --email or set ADMIN_EMAIL). Non-interactive mode detected.", file=sys.stderr)
         sys.exit(2)
-
-    ## In non-interactive mode, allow empty password to only set role on existing user
-    if not password and _isatty():
-        confirm = input("Empty password. Proceed with role-only update if user exists? [y/N]: ").strip().lower()
-        if confirm not in ("y", "yes"):
-            print("Aborted.", file=sys.stderr)
-            sys.exit(3)
 
     rc = asyncio.run(upsert_user(email=email, password=password or None, name=name, role=role))
     sys.exit(rc)
