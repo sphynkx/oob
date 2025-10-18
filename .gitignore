@@ -19,3 +19,4 @@ install/setup.js
 setup.js
 *.log
 tests/.env
+cookies.txt
