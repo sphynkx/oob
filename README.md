@@ -167,6 +167,10 @@ sudo -u postgres PGPASSWORD='ADMIN_PASSWORD'  psql -v db_user='oob' -v db_name='
 sudo -u postgres psql -d oob01  -f install/schema.sql
 service postgresql restart
 ```
+Add admin user:
+```bash
+install/add_admin.sh
+```
 
 
 ### Nginx
