@@ -19,4 +19,4 @@ if [ -f ".env" ]; then
   set +a
 fi
 
-exec uvicorn main:app --host 0.0.0.0 --port "${PORT:-8010}" --reload
+exec uvicorn main:app --host 0.0.0.0 --port "${PORT:-8010}" --reload  --proxy-headers --forwarded-allow-ips="192.168.7.1" --access-log

@@ -221,6 +221,7 @@ curl -s https://oob.sphynkx.org.ua/api/products/6 -H "Authorization: Bearer $ACC
 
 If everything is OK configure service:
 ```bash
+mkdir -p /var/log/uvicorn
 cp install/systemd/oob.service /etc/systemd/system/oob.service
 systemctl daemon-reload
 systemctl enable oob.service
